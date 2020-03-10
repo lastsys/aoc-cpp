@@ -14,11 +14,12 @@ auto read_input() -> vector<int> {
   ifstream is;
   is.open("day01.txt");
   if (!is) {
-    cout << strerror(errno) << endl;
+    cerr << strerror(errno) << endl;
     exit(EXIT_FAILURE);
   }
   vector<int> numbers;
   int number;
+
   while (is >> number) {
     numbers.push_back(number);
   }
