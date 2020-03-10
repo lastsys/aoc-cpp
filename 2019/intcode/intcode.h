@@ -8,19 +8,6 @@ using namespace std;
 
 enum class IntCodeState { running, waiting, halted };
 
-enum class IntCodeOpCode {
-  add = 1,
-  multiply = 2,
-  input = 3,
-  output = 4,
-  jump_if_true = 5,
-  jump_if_false = 6,
-  less_than = 7,
-  equals = 8,
-  adjust_rel_base = 9,
-  halt = 99
-};
-
 template<typename T>
 struct IntCode {
   map<T, T> mem;
@@ -30,23 +17,17 @@ struct IntCode {
   queue<T> output;
   IntCodeState state = IntCodeState::running;
 
-  vector<void (IntCode::*)(const T, const T, const T)> op_codes;
-
-  explicit IntCode(const vector<T> init_mem) {
+  explicit IntCode(const vector<T> &init_mem) {
     T addr = 0;
-    for (auto &v : init_mem) {
+    for (auto const v : init_mem) {
       write_mem(addr++, v);
     }
+  }
 
-    op_codes.push_back(this->oc_add);
-    op_codes.push_back(this->oc_multiply);
-    op_codes.push_back(this->oc_input);
-    op_codes.push_back(this->oc_output);
-    op_codes.push_back(this->oc_jump_if_true);
-    op_codes.push_back(this->oc_jump_if_false);
-    op_codes.push_back(this->oc_less_than);
-    op_codes.push_back(this->oc_equals);
-    op_codes.push_back(this->oc_adjust_rel_base);
+  auto run_to_halt() noexcept -> void {
+    while (state != IntCodeState::halted) {
+      step();
+    }
   }
 
   auto has_output() const noexcept -> bool {
@@ -69,17 +50,49 @@ struct IntCode {
     const auto m1 = (instruction - m3 * 10'000 - m2 * 1'000) / 100;
     const auto op_code = (instruction - m3 * 10'000 - m2 * 1'000 - m1 * 100);
 
-    if (op_code == static_cast<T>(IntCodeOpCode::halt) || state == IntCodeState::halted) {
+    if (op_code == 99 || state == IntCodeState::halted) {
       state = IntCodeState::halted;
       return;
     }
 
-    if (op_code >= static_cast<T>(IntCodeOpCode::add) &&
-        op_code <= static_cast<T>(IntCodeOpCode::adjust_rel_base)) {
-      (this->*(op_codes[op_code - 1]))(m1, m2, m3);
-    } else {
-      exit(EXIT_FAILURE);
+    switch (op_code) {
+      case 1:
+        oc_add(m1, m2, m3);
+        break;
+      case 2:
+        oc_multiply(m1, m2, m3);
+        break;
+      case 3:
+        oc_input(m1, m2, m3);
+        break;
+      case 4:
+        oc_output(m1, m2, m3);
+        break;
+      case 5:
+        oc_jump_if_true(m1, m2, m3);
+        break;
+      case 6:
+        oc_jump_if_false(m1, m2, m3);
+        break;
+      case 7:
+        oc_less_than(m1, m2, m3);
+        break;
+      case 8:
+        oc_equals(m1, m2, m3);
+        break;
+      case 9:
+        oc_adjust_rel_base(m1, m2, m3);
+        break;
+      default:
+        exit(EXIT_FAILURE);
     }
+  }
+
+  auto print_memory() const noexcept -> void {
+    for (auto const& d : mem) {
+      cout << d.second << ", ";
+    }
+    cout << endl;
   }
 
   auto read(const T mode, const T value) const noexcept -> T {
@@ -108,7 +121,6 @@ struct IntCode {
     }
   }
 
- private:
   auto read_mem(const T address) const noexcept -> T {
     const auto it = mem.find(address);
     if (mem.find(address) != mem.end()) {
@@ -133,7 +145,7 @@ struct IntCode {
   auto oc_multiply(const T m1, const T m2, const T m3) noexcept -> void {
     const auto arg1 = read(m1, read_mem(pc++));
     const auto arg2 = read(m2, read_mem(pc++));
-    const auto arg3 = read(m3, read_literal(m3, read_mem(pc++)));
+    const auto arg3 = read_literal(m3, read_mem(pc++));
     write_mem(arg3, arg1 * arg2);
   }
 
