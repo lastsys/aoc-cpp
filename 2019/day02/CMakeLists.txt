@@ -1,6 +1,6 @@
 set(TASK_NAME 2019_day02)
 
-add_library(${TASK_NAME}_lib SHARED day02.cc)
+add_library(${TASK_NAME}_lib STATIC day02.cc)
 
 add_executable(${TASK_NAME} main.cc)
 target_link_libraries(${TASK_NAME} ${TASK_NAME}_lib)
