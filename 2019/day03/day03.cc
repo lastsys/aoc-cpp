@@ -37,11 +37,8 @@ auto closest_intersection_by_steps(const vector<Direction> &path1,
   auto intersections = find_intersections(map1, map2);
   int32_t smallest_distance = numeric_limits<int32_t>::max();
   for (auto const &p : intersections) {
-    if (map1[p] < smallest_distance) {
-      smallest_distance = map1[p];
-    }
-    if (map2[p] < smallest_distance) {
-      smallest_distance = map2[p];
+    if ((map1[p] + map2[p]) < smallest_distance) {
+      smallest_distance = map1[p] + map2[p];
     }
   }
   return smallest_distance;
@@ -89,7 +86,7 @@ auto find_intersections(const PathMap &map1, const PathMap &map2) -> set<Point> 
   }
   set<Point> intersection;
   set_intersection(keys1.begin(), keys1.end(), keys2.begin(), keys2.end(),
-      inserter(intersection, intersection.begin()));
+      inserter(intersection, intersection.end()));
   return intersection;
 }
 
@@ -97,11 +94,11 @@ auto generate_map(const vector<Direction> &path) -> PathMap {
   PathMap m;
   Point pos(0, 0);
   int32_t total_steps = 0;
-
+  int32_t xp, yp;
   for (const auto &d : path) {
     switch (d.orientation) {
-      case Orientation::up: {
-        const int32_t yp = pos.y;
+      case Orientation::up:
+        yp = pos.y;
         for (int32_t y = yp + 1; y <= yp + d.length; ++y) {
           pos.y = y;
           total_steps++;
@@ -110,10 +107,9 @@ auto generate_map(const vector<Direction> &path) -> PathMap {
             m[Point(pos)] = total_steps;
           }
         }
-      }
         break;
-      case Orientation::down: {
-        const int32_t yp = pos.y;
+      case Orientation::down:
+        yp = pos.y;
         for (int32_t y = yp - 1; y >= yp - d.length; --y) {
           pos.y = y;
           total_steps++;
@@ -122,10 +118,9 @@ auto generate_map(const vector<Direction> &path) -> PathMap {
             m[Point(pos)] = total_steps;
           }
         }
-      }
         break;
-      case Orientation::right: {
-        const int32_t xp = pos.x;
+      case Orientation::right:
+        xp = pos.x;
         for (int32_t x = xp + 1; x <= xp + d.length; ++x) {
           pos.x = x;
           total_steps++;
@@ -134,10 +129,9 @@ auto generate_map(const vector<Direction> &path) -> PathMap {
             m[Point(pos)] = total_steps;
           }
         }
-      }
         break;
-      case Orientation::left: {
-        const int32_t xp = pos.x;
+      case Orientation::left:
+        xp = pos.x;
         for (int32_t x = xp - 1; x >= xp - d.length; --x) {
           pos.x = x;
           total_steps++;
@@ -146,8 +140,9 @@ auto generate_map(const vector<Direction> &path) -> PathMap {
             m[Point(pos)] = total_steps;
           }
         }
-      }
+        break;
       default:
+        cerr << "Unknown orientation: " << static_cast<int32_t>(d.orientation) << endl;
         exit(EXIT_FAILURE);
     }
   }

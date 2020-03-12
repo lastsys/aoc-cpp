@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10)
 project(advent_of_code)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_compile_options(-Wall -pedantic -Wa,-mbig-obj)
+add_compile_options(-Wall -pedantic)
 
 enable_testing()
 

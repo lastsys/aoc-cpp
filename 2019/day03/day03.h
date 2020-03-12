@@ -10,7 +10,10 @@
 using namespace std;
 
 enum class Orientation {
-  up, right, left, down
+  up = 0,
+  right = 1,
+  left = 2,
+  down = 3
 };
 
 struct Direction {
@@ -29,19 +32,17 @@ struct Point;
 auto manhattan_distance(const Point &p1, const Point &p2) -> int32_t;
 
 struct Point {
-  int32_t x;
-  int32_t y;
+  int32_t x, y;
 
   Point(const int32_t x, const int32_t y) : x(x), y(y) {}
   Point(const Point &p) = default;
 
-  bool operator<(const Point &other) const {
-    const Point p(0, 0);
-    return manhattan_distance(p, *this) < manhattan_distance(p, other);
+  bool operator<(Point const& other) const {
+    return tie(x, y) < tie(other.x, other.y);
   }
 
-  bool operator==(const Point &other) const {
-    return x == other.x && y == other.y;
+  bool operator==(Point const& other) const {
+    return tie(x, y) == tie(other.x, other.y);
   }
 };
 
