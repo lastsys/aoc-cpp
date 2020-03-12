@@ -42,6 +42,12 @@ struct IntCode {
     input.push(value);
   }
 
+  auto get_output() noexcept -> T {
+    auto value = output.front();
+    output.pop();
+    return value;
+  }
+
   auto step() noexcept -> void {
     const auto instruction = read_mem(pc++);
     // TODO: Can this be done in a nicer way?
