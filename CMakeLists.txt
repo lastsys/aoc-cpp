@@ -3,6 +3,7 @@ project(advent_of_code)
 
 set(CMAKE_CXX_STANDARD 14)
 
+add_definitions(-D_GLIBCXX_DEBUG)
 add_compile_options(-Wall -pedantic)
 
 enable_testing()
